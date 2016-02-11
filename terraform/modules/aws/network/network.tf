@@ -88,6 +88,20 @@ module "ephemeral_subnets" {
   nat_gateway_ids = "${module.nat.gateway_ids}"
 }
 
+module "peering" {
+  source = "./peering"
+  vpc_id                        = "${module.vpc.vpc_id}"
+  vpc_cidr                      = "${var.vpc_cidr}"
+  # `terraform plan` fails with
+  #     * strconv.ParseInt: parsing "${length(split(\",\", var.pub_route_table_ids))}": invalid syntax
+  pub_route_table_ids           = "${module.public_subnet.route_table_ids}"
+  priv_route_table_ids          = "${module.private_subnet.route_table_ids}"
+  # In practice have this as remote state
+  services_vpc = "vpc-12345"
+  services_cidr = "10.100.0.0/16"
+  peer_owner_id = "123445"
+}
+
 module "openvpn" {
   source = "./openvpn"
 
